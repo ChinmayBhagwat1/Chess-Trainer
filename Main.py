@@ -542,4 +542,9 @@ def drawPieces(screen, board):
                     c*SQ_SIZE, r*SQ_SIZE, SQ_SIZE, SQ_SIZE))
 
 
+def pawnPromotion(piece, row, col):
+    global gs
+    gs.board[row][col] = piece[0] + "Q"
+
+
 main()
