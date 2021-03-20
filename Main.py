@@ -3,12 +3,12 @@ import pygame as p
 from Chess import chess
 '''
 castling
-enpassant
 promotion
 check
 checkmate
 stalemate
 '''
+enpassant = [0, 0]
 WIDTH = HEIGHT = 512
 DIMENSIONS = 8
 SQ_SIZE = HEIGHT//DIMENSIONS
@@ -27,7 +27,7 @@ def loadImages():
 
 
 def getPossibleMoves(piece, row, col):
-    global possibleMoves, gs
+    global possibleMoves, gs, enpassant
     possibleMoves = []
     if piece[1] == "R":
         for i in range(8):
@@ -125,7 +125,7 @@ def getPossibleMoves(piece, row, col):
             if row - 1 > -1:
                 possibleMoves.append([row - 1, col - 1])
                 possibleMoves.append([row - 1, col])
-    elif piece[1] == "p":  # enpassant
+    elif piece[1] == "p":
         if piece[0] == "w":
             if row == 6:
                 if gs.board[row - 1][col] == '--':
@@ -142,9 +142,8 @@ def getPossibleMoves(piece, row, col):
                     possibleMoves.append([row - 1, col - 1])
                 if col + 1 < 8 and gs.board[row-1][col+1][0] == 'b':
                     possibleMoves.append([row - 1, col + 1])
-            else:
-                pass
-                # put promoting condition here
+            if row == 3 and enpassant[0] == 1:
+                possibleMoves.append([2, enpassant[1]])
         if piece[0] == "b":
             if row == 1:
                 if gs.board[row+1][col] == '--':
@@ -161,13 +160,12 @@ def getPossibleMoves(piece, row, col):
                     possibleMoves.append([row + 1, col - 1])
                 if col + 1 < 8 and gs.board[row+1][col+1][0] == 'w':
                     possibleMoves.append([row + 1, col + 1])
-            else:
-                pass
-                # put promoting condition here
+            if row == 4 and enpassant[0] == 1:
+                possibleMoves.append(5, enpassant[1])
 
 
 def obstacleDetection(piece, row, col):
-    global possibleMoves, gs
+    global possibleMoves, gs, enpassant
     toBeRemoved = []
     # candidates=[]
     print(toBeRemoved)
@@ -250,8 +248,12 @@ def main():
     screen = p.display.set_mode((WIDTH, HEIGHT))
     clock = p.time.Clock()
     screen.fill(p.Color("white"))
-    global gs
-
+    global gs, enpassant
+    prev = "--"
+    row1 = -1
+    row2 = -1
+    col1 = -1
+    col2 = -1
     switch = 0
     # print(gs.board)
     loadImages()
@@ -266,7 +268,6 @@ def main():
                 col1 = location1[0]//64
                 row1 = location1[1]//64
                 prev = gs.board[row1][col1]
-
                 if prev == '--':
                     switch = 0
                 getPossibleMoves(prev, row1, col1)
