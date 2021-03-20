@@ -13,7 +13,7 @@ checkingCo = [-1, -1]
 checkornot = False
 possMov = []
 enpassant = [0, 0]
-WIDTH = HEIGHT = 904
+WIDTH = HEIGHT = 512
 DIMENSIONS = 8
 possibleMoves = []
 SQ_SIZE = HEIGHT//DIMENSIONS
@@ -447,8 +447,8 @@ def main():
             elif e.type == p.MOUSEBUTTONDOWN and switch == 0:
                 switch = 1
                 location1 = p.mouse.get_pos()
-                col1 = location1[0]//113
-                row1 = location1[1]//113
+                col1 = location1[0]//64
+                row1 = location1[1]//64
                 prev = gs.board[row1][col1]
                 if prev == '--':
                     switch = 0
@@ -473,8 +473,8 @@ def main():
 
             elif e.type == p.MOUSEBUTTONDOWN and switch == 1:
                 location2 = p.mouse.get_pos()
-                col2 = location2[0] // 113
-                row2 = location2[1] // 113
+                col2 = location2[0] // 64
+                row2 = location2[1] // 64
                 gs.board[row1][col1] = '--'
                 gs.board[row2][col2] = prev
                 a = 5
