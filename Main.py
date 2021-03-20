@@ -266,6 +266,7 @@ def main():
                 col1 = location1[0]//64
                 row1 = location1[1]//64
                 prev = gs.board[row1][col1]
+
                 if prev == '--':
                     switch = 0
                 getPossibleMoves(prev, row1, col1)
@@ -279,6 +280,13 @@ def main():
                 row2 = location2[1] // 64
                 gs.board[row1][col1] = '--'
                 gs.board[row2][col2] = prev
+                a = 5
+                if prev[0] == "w":
+                    a = 0
+                else:
+                    a = 7
+                if row2 == a and prev[1] == "p":
+                    pawnPromotion(prev, row2, col2)
                 # print(prev)
                 switch = 0
         drawGameState(screen, gs)
@@ -310,6 +318,11 @@ def drawPieces(screen, board):
             if piece != "--":
                 screen.blit(IMAGES[piece], p.Rect(
                     c*SQ_SIZE, r*SQ_SIZE, SQ_SIZE, SQ_SIZE))
+
+
+def pawnPromotion(piece, row, col):
+    global gs
+    gs.board[row][col] = piece[0] + "Q"
 
 
 main()
