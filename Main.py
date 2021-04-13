@@ -1,6 +1,7 @@
 from pprint import pprint
 import pygame as p
 from Chess import chess
+
 '''
 castling
 promotion
@@ -387,16 +388,25 @@ def checkMo():
     return checkMoves
 
 
-def aroundKing(prev):
+def aroundKing(prev,row,col):
     for i in range(8):
         for j in range(8):
             if prev[0] == 'w':
                 if gs.board[i][j][0] == 'b' and gs.board[i][j][1] != 'K':
                     pm = getPossibleMoves(gs.board[i][j], i, j)
-
+                    pmk = getPossibleMoves(prev,row,col)
+                    for x in pm:
+                        for y in pmk:
+                            if x[0]==y[0] and x[1]==y[1]:
+                                possibleMoves.remove(x)
             if prev[0] == 'b':
                 if gs.board[i][j][0] == 'w' and gs.board[i][j][1] != 'K':
                     pm = getPossibleMoves(gs.board[i][j], i, j)
+                    pmk = getPossibleMoves(prev,row,col)
+                    for x in pm:
+                        for y in pmk:
+                            if x[0]==y[0] and x[1]==y[1]:
+                                possibleMoves.remove(x)
 
 
 def isCheck(piece, co):
@@ -437,6 +447,7 @@ def main():
     col1 = -1
     col2 = -1
     switch = 0
+    isWhiteturn=True
     # print(gs.board)
     loadImages()
     running = True
@@ -452,7 +463,12 @@ def main():
                 prev = gs.board[row1][col1]
                 if prev == '--':
                     switch = 0
-                possibleMoves = getPossibleMoves(prev, row1, col1)
+                if (isWhiteturn==True and prev[0]=='w') or (isWhiteturn==False and prev[0]=='b'):
+                    possibleMoves = getPossibleMoves(prev, row1, col1)
+                    if prev[1]=='K':
+                        aroundKing(prev,row1,col1)
+                else:
+                    switch=0
                 # obstacleDetection(prev,row1,col1)
 
                 # print(possibleMoves)
@@ -475,8 +491,11 @@ def main():
                 location2 = p.mouse.get_pos()
                 col2 = location2[0] // 64
                 row2 = location2[1] // 64
-                gs.board[row1][col1] = '--'
-                gs.board[row2][col2] = prev
+                for z in possibleMoves:
+                    if z[0]==row2 and z[1]==col2:
+                        gs.board[row1][col1] = '--'
+                        gs.board[row2][col2] = prev
+                        isWhiteturn = not(isWhiteturn)
                 a = 5
                 if prev[0] == "w":
                     a = 0
@@ -485,7 +504,6 @@ def main():
                 if row2 == a and prev[1] == "p":
                     pawnPromotion(prev, row2, col2)
                 switch = 0
-                print(stale(prev))
                 checkornot = isCheck(prev, [row2, col2])
 
             # condition for check
