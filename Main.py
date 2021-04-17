@@ -1,7 +1,11 @@
+from __future__ import print_function
 from pprint import pprint
 import pygame as p
 from Chess import chess
-
+from Chess import sunfish
+import re, sys, time
+from itertools import count
+from collections import namedtuple
 '''
 castling
 promotion
@@ -436,6 +440,8 @@ def isCheck(piece, co):
 
 
 def main():
+    hist = [sunfish.Position(sunfish.initial, 0, (True,True), (True,True), 0, 0)]
+    searcher = sunfish.Searcher()
     p.init()
     screen = p.display.set_mode((WIDTH, HEIGHT))
     clock = p.time.Clock()
@@ -463,7 +469,7 @@ def main():
                 prev = gs.board[row1][col1]
                 if prev == '--':
                     switch = 0
-                if (isWhiteturn==True and prev[0]=='w') or (isWhiteturn==False and prev[0]=='b'):
+                if (prev[0]=='w'):
                     possibleMoves = getPossibleMoves(prev, row1, col1)
                     if prev[1]=='K':
                         aroundKing(prev,row1,col1)
@@ -505,9 +511,54 @@ def main():
                     pawnPromotion(prev, row2, col2)
                 switch = 0
                 checkornot = isCheck(prev, [row2, col2])
+                
+                list1 = ['a','b','c','d','e','f','g','h']
+                stringco=list1[col1]+str(8-row1)+list1[col2]+str(8-row2)
+                
+                sunfish.print_pos(hist[-1])
+
+                if hist[-1].score <= -sunfish.MATE_LOWER:
+                    print("You lost")
+                    break
+
+                # We query the user until she enters a (pseudo) legal move.
+                move = None
+
+                while move not in hist[-1].gen_moves():
+                    print(stringco)
+                    match = re.match('([a-h][1-8])'*2, stringco)#input replace kar bc
+                    if match:
+                        move = sunfish.parse(match.group(1)), sunfish.parse(match.group(2))
+                    else:
+                        # Inform the user when invalid input (e.g. "help") is entered
+                        print("Please enter a move like g8f6")
+                hist.append(hist[-1].move(move))
+
+                # After our move we rotate the board and print it again.
+                # This allows us to see the effect of our move.
+                sunfish.print_pos(hist[-1].rotate())
+
+                if hist[-1].score <= -sunfish.MATE_LOWER:
+                    print("You won")
+                    break
+
+                # Fire up the engine to look for a move.
+                start = time.time()
+                for _depth, move, score in searcher.search(hist[-1], hist):
+                    if time.time() - start > 1:
+                        break
+
+                if score == sunfish.MATE_UPPER:
+                    print("Checkmate!")
+
+                # The black player moves from a rotated position, so we have to
+                # 'back rotate' the move before printing it.
+                print("My move:", sunfish.render(119-move[0]) + sunfish.render(119-move[1]))
+                # black plays here
+                hist.append(hist[-1].move(move))
 
             # condition for check
-
+            
             # print(checkornot)
 
             # condition for enpassant
@@ -526,7 +577,6 @@ def main():
                         enpassant[0] = 0
             else:
                 enpassant[0] = 0
-
         drawGameState(screen, gs)
         clock.tick(MAX_FPS)
         p.display.flip()
