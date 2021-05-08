@@ -443,7 +443,7 @@ def main():
     hist = [engine.Position(engine.initial, 0, (True,True), (True,True), 0, 0)]
     searcher = engine.Searcher()
     p.init()
-    screen = p.display.set_mode((WIDTH, HEIGHT))
+    screen = p.display.set_mode((WIDTH+64, HEIGHT))
     clock = p.time.Clock()
     screen.fill(p.Color("white"))
     global possibleMoves, gs, enpassant, checkornot
@@ -464,6 +464,8 @@ def main():
             elif e.type == p.MOUSEBUTTONDOWN and switch == 0:
                 switch = 1
                 location1 = p.mouse.get_pos()
+                if location1[0]>WIDTH or location1[1]>HEIGHT:
+                    break
                 col1 = location1[0]//64
                 row1 = location1[1]//64
                 prev = gs.board[row1][col1]
@@ -477,7 +479,7 @@ def main():
                     switch=0
                 # obstacleDetection(prev,row1,col1)
                 # print(possibleMoves)
-                if checkornot:
+                if checkornot and checkingPiece[0] == 'b':
                     checkm = checkMo()
                     if prev[1] != 'K':
                         spare = []
@@ -494,6 +496,8 @@ def main():
 
             elif e.type == p.MOUSEBUTTONDOWN and switch == 1:
                 location2 = p.mouse.get_pos()
+                if location2[0]>WIDTH or location2[1]>HEIGHT:
+                    break
                 col2 = location2[0] // 64
                 row2 = location2[1] // 64
                 flagger=0
@@ -618,8 +622,8 @@ def drawBoard(screen):
             for i in possibleMoves:
                 if r == i[0] and c == i[1]:
                     color = colors[2]
-            p.draw.rect(screen, color, p.Rect(
-                c*SQ_SIZE, r*SQ_SIZE, SQ_SIZE, SQ_SIZE))
+            p.draw.rect(screen, color, p.Rect(c*SQ_SIZE, r*SQ_SIZE, SQ_SIZE, SQ_SIZE))
+    p.draw.rect(screen, colors[2], p.Rect(8*SQ_SIZE, 0, SQ_SIZE, SQ_SIZE))
 
 
 def drawPieces(screen, board):
