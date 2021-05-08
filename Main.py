@@ -3,7 +3,9 @@ from pprint import pprint
 import pygame as p
 from Chess import chess
 from Chess import engine
-import re, sys, time
+import re
+import sys
+import time
 from itertools import count
 from collections import namedtuple
 '''
@@ -392,24 +394,24 @@ def checkMo():
     return checkMoves
 
 
-def aroundKing(prev,row,col):
+def aroundKing(prev, row, col):
     for i in range(8):
         for j in range(8):
             if prev[0] == 'w':
                 if gs.board[i][j][0] == 'b' and gs.board[i][j][1] != 'K':
                     pm = getPossibleMoves(gs.board[i][j], i, j)
-                    pmk = getPossibleMoves(prev,row,col)
+                    pmk = getPossibleMoves(prev, row, col)
                     for x in pm:
                         for y in pmk:
-                            if x[0]==y[0] and x[1]==y[1]:
+                            if x[0] == y[0] and x[1] == y[1]:
                                 possibleMoves.remove(x)
             if prev[0] == 'b':
                 if gs.board[i][j][0] == 'w' and gs.board[i][j][1] != 'K':
                     pm = getPossibleMoves(gs.board[i][j], i, j)
-                    pmk = getPossibleMoves(prev,row,col)
+                    pmk = getPossibleMoves(prev, row, col)
                     for x in pm:
                         for y in pmk:
-                            if x[0]==y[0] and x[1]==y[1]:
+                            if x[0] == y[0] and x[1] == y[1]:
                                 possibleMoves.remove(x)
 
 
@@ -440,10 +442,11 @@ def isCheck(piece, co):
 
 
 def main():
-    hist = [engine.Position(engine.initial, 0, (True,True), (True,True), 0, 0)]
+    hist = [engine.Position(
+        engine.initial, 0, (True, True), (True, True), 0, 0)]
     searcher = engine.Searcher()
     p.init()
-    screen = p.display.set_mode((WIDTH+64, HEIGHT))
+    screen = p.display.set_mode((WIDTH+192, HEIGHT))
     clock = p.time.Clock()
     screen.fill(p.Color("white"))
     global possibleMoves, gs, enpassant, checkornot
@@ -453,7 +456,7 @@ def main():
     col1 = -1
     col2 = -1
     switch = 0
-    isWhiteturn=True
+    isWhiteturn = True
     # print(gs.board)
     loadImages()
     running = True
@@ -464,19 +467,19 @@ def main():
             elif e.type == p.MOUSEBUTTONDOWN and switch == 0:
                 switch = 1
                 location1 = p.mouse.get_pos()
-                if location1[0]>WIDTH or location1[1]>HEIGHT:
+                if location1[0] > WIDTH or location1[1] > HEIGHT:
                     break
                 col1 = location1[0]//64
                 row1 = location1[1]//64
                 prev = gs.board[row1][col1]
                 if prev == '--':
                     switch = 0
-                if (prev[0]=='w'):
+                if (prev[0] == 'w'):
                     possibleMoves = getPossibleMoves(prev, row1, col1)
-                    if prev[1]=='K':
-                        aroundKing(prev,row1,col1)
+                    if prev[1] == 'K':
+                        aroundKing(prev, row1, col1)
                 else:
-                    switch=0
+                    switch = 0
                 # obstacleDetection(prev,row1,col1)
                 # print(possibleMoves)
                 if checkornot and checkingPiece[0] == 'b':
@@ -496,19 +499,19 @@ def main():
 
             elif e.type == p.MOUSEBUTTONDOWN and switch == 1:
                 location2 = p.mouse.get_pos()
-                if location2[0]>WIDTH or location2[1]>HEIGHT:
+                if location2[0] > WIDTH or location2[1] > HEIGHT:
                     break
                 col2 = location2[0] // 64
                 row2 = location2[1] // 64
-                flagger=0
+                flagger = 0
                 for z in possibleMoves:
-                    if z[0]==row2 and z[1]==col2:
-                        flagger=1
+                    if z[0] == row2 and z[1] == col2:
+                        flagger = 1
                         gs.board[row1][col1] = '--'
                         gs.board[row2][col2] = prev
                         isWhiteturn = not(isWhiteturn)
-                if flagger==0:
-                    switch=0
+                if flagger == 0:
+                    switch = 0
                     break
                 a = 5
                 if prev[0] == "w":
@@ -524,9 +527,9 @@ def main():
                 clock.tick(MAX_FPS)
                 p.display.flip()
                 ##
-                list1 = ['a','b','c','d','e','f','g','h']
-                stringco=list1[col1]+str(8-row1)+list1[col2]+str(8-row2)
-                
+                list1 = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+                stringco = list1[col1]+str(8-row1)+list1[col2]+str(8-row2)
+
                 engine.print_pos(hist[-1])
 
                 if hist[-1].score <= -engine.MATE_LOWER:
@@ -538,9 +541,11 @@ def main():
 
                 while move not in hist[-1].gen_moves():
                     print(stringco)
-                    match = re.match('([a-h][1-8])'*2, stringco)#input replace kar bc
+                    # input replace kar bc
+                    match = re.match('([a-h][1-8])'*2, stringco)
                     if match:
-                        move = engine.parse(match.group(1)), engine.parse(match.group(2))
+                        move = engine.parse(match.group(
+                            1)), engine.parse(match.group(2))
                     else:
                         # Inform the user when invalid input (e.g. "help") is entered
                         print("Please enter a move like g8f6")
@@ -565,25 +570,25 @@ def main():
 
                 # The black player moves from a rotated position, so we have to
                 # 'back rotate' the move before printing it.
-                frome=engine.render(119-move[0])
-                toe=engine.render(119-move[1])
+                frome = engine.render(119-move[0])
+                toe = engine.render(119-move[1])
                 print("My move:", frome + toe)
                 # black plays here
                 for i in range(len(list1)):
-                    if list1[i]==frome[0]:
+                    if list1[i] == frome[0]:
                         colb1 = i
                 rowb1 = 8-int(frome[1])
                 for i in range(len(list1)):
-                    if list1[i]==toe[0]:
+                    if list1[i] == toe[0]:
                         colb2 = i
                 rowb2 = 8-int(toe[1])
-                temp=gs.board[rowb1][colb1]
+                temp = gs.board[rowb1][colb1]
                 gs.board[rowb1][colb1] = '--'
                 gs.board[rowb2][colb2] = temp
                 hist.append(hist[-1].move(move))
 
             # condition for check
-            
+
             # print(checkornot)
 
             # condition for enpassant
@@ -614,6 +619,12 @@ def drawGameState(screen, gs):
 
 
 def drawBoard(screen):
+    red = (200, 0, 0)
+    blue = (0, 0, 200)
+    bright_red = (255, 0, 0)
+    bright_blue = (0, 0, 255)
+    white = (255, 255, 255)
+
     global possibleMoves
     colors = [p.Color("burlywood"), p.Color("burlywood4"), p.Color("brown1")]
     for r in range(DIMENSIONS):
@@ -622,8 +633,25 @@ def drawBoard(screen):
             for i in possibleMoves:
                 if r == i[0] and c == i[1]:
                     color = colors[2]
-            p.draw.rect(screen, color, p.Rect(c*SQ_SIZE, r*SQ_SIZE, SQ_SIZE, SQ_SIZE))
-    p.draw.rect(screen, colors[2], p.Rect(8*SQ_SIZE, 0, SQ_SIZE, SQ_SIZE))
+            p.draw.rect(screen, color, p.Rect(
+                c*SQ_SIZE, r*SQ_SIZE, SQ_SIZE, SQ_SIZE))
+    mouse = p.mouse.get_pos()
+    click = p.mouse.get_pressed()
+    smallText = p.font.Font("freesansbold.ttf", 20)
+    if 544+128 > mouse[0] > 544 and 224+64 > mouse[1] > 224:
+        p.draw.rect(screen, bright_blue, (544, 224, 128, 64))
+        text = smallText.render("HINT", True, red, bright_blue)
+        # for e in p.event.get():
+        if click[0] == 1:
+            Hint()
+
+    else:
+        p.draw.rect(screen, blue, (544, 224, 128, 64))
+        text = smallText.render("HINT", True, red, blue)
+
+    textRect = text.get_rect()
+    textRect.center = ((544+(128/2)), (224+32))
+    screen.blit(text, textRect)
 
 
 def drawPieces(screen, board):
@@ -638,6 +666,10 @@ def drawPieces(screen, board):
 def pawnPromotion(piece, row, col):
     global gs
     gs.board[row][col] = piece[0] + "Q"
+
+
+def Hint():
+    print("Hi")
 
 
 main()
