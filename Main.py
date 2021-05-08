@@ -2,7 +2,7 @@ from __future__ import print_function
 from pprint import pprint
 import pygame as p
 from Chess import chess
-from Chess import sunfish
+from Chess import engine
 import re, sys, time
 from itertools import count
 from collections import namedtuple
@@ -292,11 +292,11 @@ def checkMo():
     kingplace = [-1, -1]
     checkMoves = []
     if checkornot:
-        if checkingPiece[0] == 'w':
-            for i in possMov:
-                if gs.board[i[0]][i[1]] == 'bK':
-                    kingplace = i
-        else:
+        # if checkingPiece[0] == 'w':
+        #     for i in possMov:
+        #         if gs.board[i[0]][i[1]] == 'bK':
+        #             kingplace = i
+        if checkingPiece[0] == 'b':
             for i in possMov:
                 if gs.board[i[0]][i[1]] == 'wK':
                     kingplace = i
@@ -440,8 +440,8 @@ def isCheck(piece, co):
 
 
 def main():
-    hist = [sunfish.Position(sunfish.initial, 0, (True,True), (True,True), 0, 0)]
-    searcher = sunfish.Searcher()
+    hist = [engine.Position(engine.initial, 0, (True,True), (True,True), 0, 0)]
+    searcher = engine.Searcher()
     p.init()
     screen = p.display.set_mode((WIDTH, HEIGHT))
     clock = p.time.Clock()
@@ -476,7 +476,6 @@ def main():
                 else:
                     switch=0
                 # obstacleDetection(prev,row1,col1)
-
                 # print(possibleMoves)
                 if checkornot:
                     checkm = checkMo()
@@ -497,11 +496,16 @@ def main():
                 location2 = p.mouse.get_pos()
                 col2 = location2[0] // 64
                 row2 = location2[1] // 64
+                flagger=0
                 for z in possibleMoves:
                     if z[0]==row2 and z[1]==col2:
+                        flagger=1
                         gs.board[row1][col1] = '--'
                         gs.board[row2][col2] = prev
                         isWhiteturn = not(isWhiteturn)
+                if flagger==0:
+                    switch=0
+                    break
                 a = 5
                 if prev[0] == "w":
                     a = 0
@@ -511,13 +515,17 @@ def main():
                     pawnPromotion(prev, row2, col2)
                 switch = 0
                 checkornot = isCheck(prev, [row2, col2])
-                
+                ##
+                drawGameState(screen, gs)
+                clock.tick(MAX_FPS)
+                p.display.flip()
+                ##
                 list1 = ['a','b','c','d','e','f','g','h']
                 stringco=list1[col1]+str(8-row1)+list1[col2]+str(8-row2)
                 
-                sunfish.print_pos(hist[-1])
+                engine.print_pos(hist[-1])
 
-                if hist[-1].score <= -sunfish.MATE_LOWER:
+                if hist[-1].score <= -engine.MATE_LOWER:
                     print("You lost")
                     break
 
@@ -528,7 +536,7 @@ def main():
                     print(stringco)
                     match = re.match('([a-h][1-8])'*2, stringco)#input replace kar bc
                     if match:
-                        move = sunfish.parse(match.group(1)), sunfish.parse(match.group(2))
+                        move = engine.parse(match.group(1)), engine.parse(match.group(2))
                     else:
                         # Inform the user when invalid input (e.g. "help") is entered
                         print("Please enter a move like g8f6")
@@ -536,9 +544,9 @@ def main():
 
                 # After our move we rotate the board and print it again.
                 # This allows us to see the effect of our move.
-                sunfish.print_pos(hist[-1].rotate())
+                engine.print_pos(hist[-1].rotate())
 
-                if hist[-1].score <= -sunfish.MATE_LOWER:
+                if hist[-1].score <= -engine.MATE_LOWER:
                     print("You won")
                     break
 
@@ -548,13 +556,26 @@ def main():
                     if time.time() - start > 1:
                         break
 
-                if score == sunfish.MATE_UPPER:
+                if score == engine.MATE_UPPER:
                     print("Checkmate!")
 
                 # The black player moves from a rotated position, so we have to
                 # 'back rotate' the move before printing it.
-                print("My move:", sunfish.render(119-move[0]) + sunfish.render(119-move[1]))
+                frome=engine.render(119-move[0])
+                toe=engine.render(119-move[1])
+                print("My move:", frome + toe)
                 # black plays here
+                for i in range(len(list1)):
+                    if list1[i]==frome[0]:
+                        colb1 = i
+                rowb1 = 8-int(frome[1])
+                for i in range(len(list1)):
+                    if list1[i]==toe[0]:
+                        colb2 = i
+                rowb2 = 8-int(toe[1])
+                temp=gs.board[rowb1][colb1]
+                gs.board[rowb1][colb1] = '--'
+                gs.board[rowb2][colb2] = temp
                 hist.append(hist[-1].move(move))
 
             # condition for check

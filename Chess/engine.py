@@ -415,9 +415,16 @@ def main():
         # We query the user until she enters a (pseudo) legal move.
         move = None
         while move not in hist[-1].gen_moves():
-            match = re.match('([a-h][1-8])'*2, input('Your move: '))
+            mymove= input('Your move: ')
+            match = re.match('([a-h][1-8])'*2, mymove)
             if match:
                 move = parse(match.group(1)), parse(match.group(2))
+            elif mymove=='hint':
+                start = time.time()
+                for _depth, move, score in searcher.search(hist[-1], hist):
+                    if time.time() - start > 1:
+                        break
+                print("Best move:", render(move[0]) + render(move[1]))
             else:
                 # Inform the user when invalid input (e.g. "help") is entered
                 print("Please enter a move like g8f6")
@@ -445,7 +452,6 @@ def main():
         print("My move:", render(119-move[0]) + render(119-move[1]))
         hist.append(hist[-1].move(move))
 
-'''
+
 if __name__ == '__main__':
     main()
-'''
