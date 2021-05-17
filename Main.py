@@ -28,6 +28,7 @@ MAX_FPS = 15
 IMAGES = {}
 gs = chess.GameState()
 
+global hist
 
 def loadImages():
     pieces = ["wR", "wN", "wB", "wQ", "wK",
@@ -442,6 +443,7 @@ def isCheck(piece, co):
 
 
 def main():
+    global hist,listy,click_flagger
     hist = [engine.Position(
         engine.initial, 0, (True, True), (True, True), 0, 0)]
     searcher = engine.Searcher()
@@ -513,6 +515,7 @@ def main():
                 if flagger == 0:
                     switch = 0
                     break
+                click_flagger=0
                 a = 5
                 if prev[0] == "w":
                     a = 0
@@ -617,12 +620,15 @@ def drawGameState(screen, gs):
     drawBoard(screen)
     drawPieces(screen, gs.board)
 
-
+click_flagger=0
+listy= []
 def drawBoard(screen):
+    global click_flagger,listy
     red = (200, 0, 0)
     blue = (0, 0, 200)
     bright_red = (255, 0, 0)
     bright_blue = (0, 0, 255)
+    bright_green = (0, 255, 0)
     white = (255, 255, 255)
 
     global possibleMoves
@@ -633,6 +639,11 @@ def drawBoard(screen):
             for i in possibleMoves:
                 if r == i[0] and c == i[1]:
                     color = colors[2]
+            if click_flagger==1:
+                if r==listy[0] and c == listy[1]:
+                    color = bright_green
+                if r==listy[2] and c == listy[3]:
+                    color = bright_green
             p.draw.rect(screen, color, p.Rect(
                 c*SQ_SIZE, r*SQ_SIZE, SQ_SIZE, SQ_SIZE))
     mouse = p.mouse.get_pos()
@@ -643,7 +654,20 @@ def drawBoard(screen):
         text = smallText.render("HINT", True, red, bright_blue)
         # for e in p.event.get():
         if click[0] == 1:
-            Hint()
+            click_flagger=1
+            listy=Hint()
+            for r in range(DIMENSIONS):
+                for c in range(DIMENSIONS):
+                    color = colors[((r+c) % 2)]
+                    for i in possibleMoves:
+                        if r == i[0] and c == i[1]:
+                            color = colors[2]
+                    if r==listy[0] and c == listy[1]:
+                        color = bright_green
+                    if r==listy[2] and c == listy[3]:
+                        color = bright_green
+                    p.draw.rect(screen, color, p.Rect(
+                        c*SQ_SIZE, r*SQ_SIZE, SQ_SIZE, SQ_SIZE))
 
     else:
         p.draw.rect(screen, blue, (544, 224, 128, 64))
@@ -669,7 +693,29 @@ def pawnPromotion(piece, row, col):
 
 
 def Hint():
+    global hist
+    searcher = engine.Searcher()
+    list1 = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+    #stringco = list1[col1]+str(8-row1)+list1[col2]+str(8-row2)
     print("Hi")
+    # Fire up the engine to look for a move.
+    start = time.time()
+    for _depth, move, score in searcher.search(hist[-1], hist):
+        if time.time() - start > 1:
+            break
 
+    frome = engine.render(move[0])
+    toe = engine.render(move[1])
+
+    for i in range(len(list1)):
+        if list1[i] == frome[0]:
+            colb1 = i
+    rowb1 = 8-int(frome[1])
+    for i in range(len(list1)):
+        if list1[i] == toe[0]:
+            colb2 = i
+    rowb2 = 8-int(toe[1])
+    listy=[rowb1,colb1,rowb2,colb2]
+    return listy
 
 main()
