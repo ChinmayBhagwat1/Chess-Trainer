@@ -505,6 +505,8 @@ def main():
                     break
                 col2 = location2[0] // 64
                 row2 = location2[1] // 64
+                if gs.board[row2][col2][0]=='w':
+                    break
                 flagger = 0
                 for z in possibleMoves:
                     if z[0] == row2 and z[1] == col2:

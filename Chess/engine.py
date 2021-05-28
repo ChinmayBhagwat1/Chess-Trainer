@@ -1,7 +1,4 @@
-#!/usr/bin/env pypy
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 import re, sys, time
 from itertools import count
 from collections import namedtuple
@@ -226,7 +223,7 @@ class Searcher:
             if depth > 0 and not root and any(c in pos.board for c in 'RBNQ'):
                 yield None, -self.bound(pos.nullmove(), 1-gamma, depth-3, root=False)
             if depth == 0:
-                yield None, pos.score.
+                yield None, pos.score
             killer = self.tp_move.get(pos)
             if killer and (depth > 0 or pos.value(killer) >= QS_LIMIT):
                 yield killer, -self.bound(pos.move(killer), 1-gamma, depth-1, root=False)
